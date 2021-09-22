@@ -52,9 +52,11 @@ class EditStoreFragment : Fragment() {
     }
 
     private fun setupViewModel(id:Long) {
-        mEditViewModel = ViewModelProvider(this)[EditViewModel::class.java]
+        mEditViewModel = ViewModelProvider(requireActivity())[EditViewModel::class.java]
         mEditViewModel.getEditStore().observe(viewLifecycleOwner, {
-            setUiStore(it!!)
+            if(it.id > 0) {
+                setUiStore(it!!)
+            }
         })
         mEditViewModel.loadStore(id)
     }
