@@ -1,4 +1,6 @@
-package com.cursosant.android.stores
+package com.cursosant.android.stores.mainModule.adapters
+
+import com.cursosant.android.stores.common.entities.StoreEntity
 
 /****
  * Project: Stores

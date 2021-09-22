@@ -1,15 +1,21 @@
-package com.cursosant.android.stores
+package com.cursosant.android.stores.mainModule
 
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.cursosant.android.stores.R
+import com.cursosant.android.stores.common.entities.StoreEntity
+import com.cursosant.android.stores.common.utils.MainAux
 import com.cursosant.android.stores.databinding.ActivityMainBinding
+import com.cursosant.android.stores.editModulo.EditStoreFragment
+import com.cursosant.android.stores.mainModule.adapters.OnClickListener
+import com.cursosant.android.stores.mainModule.adapters.StoreAdapter
+import com.cursosant.android.stores.mainModule.viewModel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 
 class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
@@ -17,6 +23,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
     private lateinit var mAdapter: StoreAdapter
     private lateinit var mGridLayout: GridLayoutManager
+    private lateinit var mMainViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +32,15 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
         mBinding.fab.setOnClickListener { launchEditFragment() }
 
+        setupViewModel()
         setupRecylcerView()
+    }
+
+    private fun setupViewModel() {
+        mMainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        mMainViewModel.getStores().observe(this, {
+            mAdapter.setStores(it as MutableList<StoreEntity>)
+        })
     }
 
     private fun launchEditFragment(args: Bundle? = null) {
@@ -45,7 +60,6 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private fun setupRecylcerView() {
         mAdapter = StoreAdapter(mutableListOf(), this)
         mGridLayout = GridLayoutManager(this, resources.getInteger(R.integer.main_columns))
-        getStores()
 
         mBinding.recyclerView.apply {
             setHasFixedSize(true)
@@ -54,54 +68,15 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         }
     }
 
-    private fun getStores(){
-        doAsync {
-            val stores = StoreApplication.database.storeDao().getAllStores()
-            uiThread {
-                mAdapter.setStores(stores)
-            }
-        }
-    }
 
-    /*
-    * OnClickListener
-    * */
-    override fun onClick(storeId: Long) {
-        val args = Bundle()
-        args.putLong(getString(R.string.arg_id), storeId)
-
-        launchEditFragment(args)
-    }
-
-    override fun onFavoriteStore(storeEntity: StoreEntity) {
-        storeEntity.isFavorite = !storeEntity.isFavorite
-        doAsync {
-            StoreApplication.database.storeDao().updateStore(storeEntity)
-            uiThread {
-                updateStore(storeEntity)
-            }
-        }
-    }
-
-    override fun onDeleteStore(storeEntity: StoreEntity) {
-        val items = resources.getStringArray(R.array.array_options_item)
-
-        MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_options_title)
-                .setItems(items, { dialogInterface, i ->
-                    when(i){
-                        0 -> confirmDelete(storeEntity)
-
-                        1 -> dial(storeEntity.phone)
-
-                        2 -> goToWebsite(storeEntity.website)
-                    }
-                })
-                .show()
-    }
 
     private fun confirmDelete(storeEntity: StoreEntity){
 
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_delete_title)
+            .setPositiveButton(R.string.dialog_delete_confirm) { _, _ -> mMainViewModel.deleteStore(storeEntity) }
+            .setNegativeButton(R.string.dialog_delete_cancel, null)
+            .show()
     }
 
     private fun dial(phone: String){
@@ -134,6 +109,38 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     }
 
     /*
+     * OnClickListener
+     * */
+    override fun onClick(storeId: Long) {
+        val args = Bundle()
+        args.putLong(getString(R.string.arg_id), storeId)
+
+        launchEditFragment(args)
+    }
+
+    override fun onFavoriteStore(storeEntity: StoreEntity) {
+        mMainViewModel.updateStore(storeEntity)
+    }
+
+    override fun onDeleteStore(storeEntity: StoreEntity) {
+        val items = resources.getStringArray(R.array.array_options_item)
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_options_title)
+            .setItems(items) { _, i ->
+                when (i) {
+                    0 -> confirmDelete(storeEntity)
+
+                    1 -> dial(storeEntity.phone)
+
+                    2 -> goToWebsite(storeEntity.website)
+                }
+            }
+            .show()
+    }
+
+
+    /*
     * MainAux
     * */
     override fun hideFab(isVisible: Boolean) {
@@ -141,10 +148,10 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     }
 
     override fun addStore(storeEntity: StoreEntity) {
-        mAdapter.add(storeEntity)
+        mMainViewModel.addStore(storeEntity)
     }
 
     override fun updateStore(storeEntity: StoreEntity) {
-        mAdapter.update(storeEntity)
+        mMainViewModel.updateStore(storeEntity)
     }
 }
