@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.cursosant.android.stores.R
@@ -14,6 +15,7 @@ import com.cursosant.android.stores.databinding.ActivityMainBinding
 import com.cursosant.android.stores.editModulo.EditStoreFragment
 import com.cursosant.android.stores.mainModule.adapters.OnClickListener
 import com.cursosant.android.stores.mainModule.adapters.StoreAdapter
+import com.cursosant.android.stores.mainModule.adapters.StoreListAdapter
 import com.cursosant.android.stores.mainModule.viewModel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
@@ -21,7 +23,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
 
     private lateinit var mBinding: ActivityMainBinding
 
-    private lateinit var mAdapter: StoreAdapter
+    private lateinit var mAdapter: StoreListAdapter
     private lateinit var mGridLayout: GridLayoutManager
     private lateinit var mMainViewModel: MainViewModel
 
@@ -31,7 +33,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         setContentView(mBinding.root)
 
         mBinding.fab.setOnClickListener { launchEditFragment() }
-
+        mBinding.progressCircular.isVisible = true
         setupViewModel()
         setupRecylcerView()
     }
@@ -39,7 +41,8 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     private fun setupViewModel() {
         mMainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
         mMainViewModel.getStores().observe(this, {
-            mAdapter.setStores(it as MutableList<StoreEntity>)
+            mBinding.progressCircular.isVisible = false
+            mAdapter.submitList(it)
         })
     }
 
@@ -58,7 +61,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     }
 
     private fun setupRecylcerView() {
-        mAdapter = StoreAdapter(mutableListOf(), this)
+        mAdapter = StoreListAdapter(this)
         mGridLayout = GridLayoutManager(this, resources.getInteger(R.integer.main_columns))
 
         mBinding.recyclerView.apply {

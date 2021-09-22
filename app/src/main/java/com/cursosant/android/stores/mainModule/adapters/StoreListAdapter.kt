@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -13,8 +15,8 @@ import com.cursosant.android.stores.databinding.ItemStoreBinding
 import com.google.android.material.checkbox.MaterialCheckBox
 
 
-class StoreAdapter(private var stores: MutableList<StoreEntity>, private var listener: OnClickListener) :
-    RecyclerView.Adapter<StoreAdapter.ViewHolder>() {
+class StoreListAdapter(private var listener: OnClickListener) :
+    ListAdapter<StoreEntity, RecyclerView.ViewHolder>(StoreDiffCallback()) {
 
     private lateinit var mContext: Context
 
@@ -26,10 +28,10 @@ class StoreAdapter(private var stores: MutableList<StoreEntity>, private var lis
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val store = stores.get(position)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val store = getItem(position)
 
-        with(holder){
+        with(holder as ViewHolder){
             setListener(store)
 
             binding.tvName.text = store.name
@@ -40,20 +42,6 @@ class StoreAdapter(private var stores: MutableList<StoreEntity>, private var lis
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .centerCrop()
                 .into(binding.imgPhoto)
-        }
-    }
-
-    override fun getItemCount(): Int = stores.size
-
-    fun setStores(stores: MutableList<StoreEntity>) {
-        this.stores = stores
-        notifyDataSetChanged()
-    }
-
-    fun add(storeEntity: StoreEntity) {
-        if (!stores.contains(storeEntity)) {
-            stores.add(storeEntity)
-            notifyItemInserted(stores.size-1)
         }
     }
 
@@ -73,6 +61,17 @@ class StoreAdapter(private var stores: MutableList<StoreEntity>, private var lis
                 storeEntity.isFavorite = (it as MaterialCheckBox).isChecked
                 listener.onFavoriteStore(storeEntity)
             }
+        }
+    }
+
+    class StoreDiffCallback:DiffUtil.ItemCallback<StoreEntity>(){
+
+        override fun areItemsTheSame(oldItem: StoreEntity, newItem: StoreEntity): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: StoreEntity, newItem: StoreEntity): Boolean {
+            return oldItem == newItem
         }
     }
 }

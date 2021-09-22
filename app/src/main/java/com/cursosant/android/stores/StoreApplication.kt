@@ -6,16 +6,6 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cursosant.android.stores.common.database.StoreDatabase
 
-/****
- * Project: Stores
- * From: com.cursosant.android.stores
- * Created by Alain Nicolás Tello on 27/11/20 at 12:40
- * Course: Android Practical with Kotlin from zero.
- * All rights reserved 2021.
- *
- * All my Courses(Only on Udemy):
- * https://www.udemy.com/user/alain-nicolas-tello/
- ***/
 class StoreApplication : Application() {
     companion object{
         lateinit var database: StoreDatabase

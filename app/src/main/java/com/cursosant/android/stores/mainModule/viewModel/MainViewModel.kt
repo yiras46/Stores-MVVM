@@ -1,7 +1,6 @@
 package com.cursosant.android.stores.mainModule.viewModel
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.cursosant.android.stores.common.entities.StoreEntity
 import com.cursosant.android.stores.mainModule.model.MainInteractor
@@ -10,9 +9,7 @@ class MainViewModel: ViewModel() {
 
     private var interactor = MainInteractor()
 
-    private val stores:MutableLiveData<MutableList<StoreEntity>> by lazy {
-        MutableLiveData<MutableList<StoreEntity>>().also { loadStores() }
-    }
+    private val stores = interactor.stores
 
     fun getStores():LiveData<MutableList<StoreEntity>>{
         return stores
@@ -32,7 +29,7 @@ class MainViewModel: ViewModel() {
             val index = stores.value!!.indexOf(storeEntity)
             if (index != -1){
                 stores.value!![index] = storeEntity
-                stores.value = stores.value //Fix refresh
+                //stores.value = stores.value //Fix refresh
             }
         }
     }
@@ -41,13 +38,7 @@ class MainViewModel: ViewModel() {
         interactor.addStore(storeEntity){
             storeEntity.apply { id = it }
             stores.value!!.add(storeEntity)
-            stores.value = stores.value //Fix refresh
-        }
-    }
-
-    private fun loadStores(){
-        interactor.getStores {
-            this@MainViewModel.stores.value = it
+            //stores.value = stores.value //Fix refresh
         }
     }
 }
