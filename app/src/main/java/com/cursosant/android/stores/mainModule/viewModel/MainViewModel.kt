@@ -41,7 +41,7 @@ class MainViewModel: ViewModel() {
 
         return viewModelScope.launch {
             _showProgress.value = true
-            delay(1_000)
+            delay(1_000) //FIXME delay temporal
             try {
                 block()
             }catch (e:StoresExceptions){
