@@ -30,4 +30,9 @@
 
     <string name="options_item_call">Llamar</string>
     <string name="options_item_website">Ir al sition web</string>
+    <string name="error_update">No se ha podido actualizar la tienda</string>
+    <string name="error_add">No se ha creado la tienda</string>
+    <string name="error_delete">Error al borrar la tienda</string>
+    <string name="error_indeterminate">Error indeterminado</string>
+    <string name="error_get">Problema al obtener tiendas</string>
 </resources>

@@ -3,6 +3,7 @@ package com.cursosant.android.stores.mainModule
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -11,10 +12,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.cursosant.android.stores.R
 import com.cursosant.android.stores.common.entities.StoreEntity
 import com.cursosant.android.stores.common.utils.MainAux
+import com.cursosant.android.stores.common.utils.TypeError
 import com.cursosant.android.stores.databinding.ActivityMainBinding
 import com.cursosant.android.stores.editModulo.EditStoreFragment
 import com.cursosant.android.stores.mainModule.adapters.OnClickListener
-import com.cursosant.android.stores.mainModule.adapters.StoreAdapter
 import com.cursosant.android.stores.mainModule.adapters.StoreListAdapter
 import com.cursosant.android.stores.mainModule.viewModel.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -33,16 +34,30 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
         setContentView(mBinding.root)
 
         mBinding.fab.setOnClickListener { launchEditFragment() }
-        mBinding.progressCircular.isVisible = true
+        mBinding.progressCircular.visibility = View.VISIBLE
         setupViewModel()
         setupRecylcerView()
     }
 
     private fun setupViewModel() {
         mMainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        mMainViewModel.getStores().observe(this, {
-            mBinding.progressCircular.isVisible = false
-            mAdapter.submitList(it)
+        mMainViewModel.stores.observe(this, { mAdapter.submitList(it) })
+
+        mMainViewModel.showProgress.observe(this, { isShowProgress->
+            mBinding.progressCircular.isVisible = isShowProgress
+        })
+
+        mMainViewModel.typeError.observe(this, {
+
+            val msgError = when(it){
+                TypeError.GET -> getString(R.string.error_get)
+                TypeError.UPDATE -> getString(R.string.error_update)
+                TypeError.INSERT -> getString(R.string.error_add)
+                TypeError.DELETE -> getString(R.string.error_delete)
+                else -> getString(R.string.error_indeterminate)
+            }
+
+            Toast.makeText(this, "Error: $msgError", Toast.LENGTH_SHORT).show()
         })
     }
 
@@ -148,13 +163,5 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
     * */
     override fun hideFab(isVisible: Boolean) {
         if (isVisible) mBinding.fab.show() else mBinding.fab.hide()
-    }
-
-    override fun addStore(storeEntity: StoreEntity) {
-        mMainViewModel.addStore(storeEntity)
-    }
-
-    override fun updateStore(storeEntity: StoreEntity) {
-        mMainViewModel.updateStore(storeEntity)
     }
 }

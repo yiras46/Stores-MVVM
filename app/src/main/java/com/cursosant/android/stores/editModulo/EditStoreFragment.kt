@@ -16,6 +16,7 @@ import com.cursosant.android.stores.common.entities.StoreEntity
 import com.cursosant.android.stores.databinding.FragmentEditStoreBinding
 import com.cursosant.android.stores.editModulo.viewModel.EditViewModel
 import com.cursosant.android.stores.mainModule.MainActivity
+import com.cursosant.android.stores.mainModule.viewModel.MainViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 
@@ -122,20 +123,20 @@ class EditStoreFragment : Fragment() {
 
                     hideKeyboard()
 
-                    if (mIsEditMode){
-                        mActivity?.updateStore(mEditViewModel.getEditStore().value!!)
+                    val mMainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
 
+                    if (mIsEditMode){
+                        mMainViewModel.updateStore(mEditViewModel.getEditStore().value!!)
                         Snackbar.make(mBinding.root,
                             R.string.edit_store_message_update_success,
                             Snackbar.LENGTH_SHORT).show()
                     } else {
-                        mActivity?.addStore(mEditViewModel.getEditStore().value!!)
-
+                        mMainViewModel.addStore(mEditViewModel.getEditStore().value!!)
                         Toast.makeText(mActivity,
                             R.string.edit_store_message_save_success, Toast.LENGTH_SHORT).show()
-
-                        mActivity?.onBackPressed()
                     }
+
+                    mActivity?.onBackPressed()
                 }
                 true
             }

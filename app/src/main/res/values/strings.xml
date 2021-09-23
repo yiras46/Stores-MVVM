@@ -31,4 +31,9 @@
 
     <string name="options_item_call">To call</string>
     <string name="options_item_website">Go to website</string>
+    <string name="error_get">Get store problem</string>
+    <string name="error_update">Update store problem</string>
+    <string name="error_add">Create store problem</string>
+    <string name="error_delete">Delete store problem</string>
+    <string name="error_indeterminate">Unknown error</string>
 </resources>
