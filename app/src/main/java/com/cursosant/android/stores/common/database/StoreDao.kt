@@ -13,7 +13,7 @@ interface StoreDao {
     @Query("SELECT * FROM StoreEntity where id = :id")
     suspend fun getStoreById(id: Long): StoreEntity
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addStore(storeEntity: StoreEntity): Long
 
     @Update

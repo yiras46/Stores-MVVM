@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity(), OnClickListener, MainAux {
                 TypeError.UPDATE -> getString(R.string.error_update)
                 TypeError.INSERT -> getString(R.string.error_add)
                 TypeError.DELETE -> getString(R.string.error_delete)
+                TypeError.API -> getString(R.string.error_store_volley)
                 else -> getString(R.string.error_indeterminate)
             }
 

@@ -35,4 +35,5 @@
     <string name="error_delete">Error al borrar la tienda</string>
     <string name="error_indeterminate">Error indeterminado</string>
     <string name="error_get">Problema al obtener tiendas</string>
+    <string name="error_store_volley">Error al conectarse al servidor</string>
 </resources>

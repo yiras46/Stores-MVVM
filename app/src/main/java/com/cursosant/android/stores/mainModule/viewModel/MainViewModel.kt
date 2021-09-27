@@ -5,6 +5,8 @@ import com.cursosant.android.stores.common.entities.StoreEntity
 import com.cursosant.android.stores.common.utils.StoresExceptions
 import com.cursosant.android.stores.common.utils.TypeError
 import com.cursosant.android.stores.mainModule.model.MainInteractor
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -18,12 +20,29 @@ class MainViewModel: ViewModel() {
     val typeError:LiveData<TypeError> = _typeError
     val showProgress:LiveData<Boolean> = _showProgress
     val stores: LiveData<MutableList<StoreEntity>> = liveData {
-        delay(2_000) //FIXME delay temporal de ejemplo
         _showProgress.value = true
-        emitSource(interactor.getAllStores())
-        _showProgress.value = false
+        try {
+            getStoresApi()
+        }catch (e:StoresExceptions){
+            _typeError.value = e.typeError
+        }finally {
+            _showProgress.value = false
+            emitSource(interactor.getAllStoresRoom())
+        }
     }
 
+    private fun getStoresApi(){
+        viewModelScope.launch {
+            interactor.getAllStoresApi { stores ->
+                val jsonList = stores.toString()
+                val mutableListType = object : TypeToken<MutableList<StoreEntity>>(){}.type
+                val storeList = Gson().fromJson<MutableList<StoreEntity>>(jsonList, mutableListType)
+                storeList.forEach {
+                    addStore(it)
+                }
+            }
+        }
+    }
 
     fun deleteStore(storeEntity: StoreEntity){
         executeAction { interactor.deleteStore(storeEntity) }
@@ -41,7 +60,6 @@ class MainViewModel: ViewModel() {
 
         return viewModelScope.launch {
             _showProgress.value = true
-            delay(1_000) //FIXME delay temporal
             try {
                 block()
             }catch (e:StoresExceptions){
