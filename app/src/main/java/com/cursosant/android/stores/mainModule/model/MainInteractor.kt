@@ -9,6 +9,8 @@ import com.cursosant.android.stores.common.entities.StoreEntity
 import com.cursosant.android.stores.common.utils.Constants
 import com.cursosant.android.stores.common.utils.StoresExceptions
 import com.cursosant.android.stores.common.utils.TypeError
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -17,12 +19,14 @@ class MainInteractor {
 
     private val url = Constants.STORES_ENDPOINT + Constants.GET_ALL
 
-    fun getAllStoresApi(callbak:(JSONArray) -> Unit){
+    fun getAllStoresApi(callbak:(MutableList<StoreEntity>) -> Unit){
 
         val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null, { response ->
             val status = response.getInt(Constants.STATUS_PROPERTY)
             if(status == Constants.SUCCESS){
-                callbak(response.getJSONArray(Constants.STORES_PROPERTY))
+                val jsonList = response.getJSONArray(Constants.STORES_PROPERTY).toString()
+                val mutableListType = object : TypeToken<MutableList<StoreEntity>>(){}.type
+                callbak(Gson().fromJson(jsonList, mutableListType))
             }else{
                 throw StoresExceptions(TypeError.API)
             }

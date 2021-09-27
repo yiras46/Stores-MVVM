@@ -8,7 +8,6 @@ import com.cursosant.android.stores.mainModule.model.MainInteractor
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainViewModel: ViewModel() {
@@ -28,19 +27,6 @@ class MainViewModel: ViewModel() {
         }finally {
             _showProgress.value = false
             emitSource(interactor.getAllStoresRoom())
-        }
-    }
-
-    private fun getStoresApi(){
-        viewModelScope.launch {
-            interactor.getAllStoresApi { stores ->
-                val jsonList = stores.toString()
-                val mutableListType = object : TypeToken<MutableList<StoreEntity>>(){}.type
-                val storeList = Gson().fromJson<MutableList<StoreEntity>>(jsonList, mutableListType)
-                storeList.forEach {
-                    addStore(it)
-                }
-            }
         }
     }
 
@@ -66,6 +52,16 @@ class MainViewModel: ViewModel() {
                 _typeError.value = e.typeError
             }finally {
                 _showProgress.value = false
+            }
+        }
+    }
+
+    private fun getStoresApi(){
+        viewModelScope.launch {
+            interactor.getAllStoresApi { stores ->
+                stores.forEach {
+                    addStore(it)
+                }
             }
         }
     }
