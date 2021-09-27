@@ -9,4 +9,5 @@ object Constants {
     const val STORES_PROPERTY = "stores"
 
     const val SUCCESS = 1
+    const val ERROR = 2
 }

@@ -58,9 +58,14 @@ class MainViewModel: ViewModel() {
 
     private fun getStoresApi(){
         viewModelScope.launch {
-            interactor.getAllStoresApi { stores ->
-                stores.forEach {
-                    addStore(it)
+
+            interactor.getAllStoresApi { stores, e ->
+                if(e == null && stores != null) {
+                    stores.forEach {
+                        addStore(it)
+                    }
+                }else{
+                    _typeError.value = e!!.typeError
                 }
             }
         }

@@ -13,25 +13,26 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 
 class MainInteractor {
 
     private val url = Constants.STORES_ENDPOINT + Constants.GET_ALL
 
-    fun getAllStoresApi(callbak:(MutableList<StoreEntity>) -> Unit){
+    fun getAllStoresApi(callbak:(MutableList<StoreEntity>?, StoresExceptions?) -> Unit){
 
         val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url, null, { response ->
-            val status = response.getInt(Constants.STATUS_PROPERTY)
-            if(status == Constants.SUCCESS){
-                val jsonList = response.getJSONArray(Constants.STORES_PROPERTY).toString()
+
+            val status = response.optInt(Constants.STATUS_PROPERTY, Constants.ERROR)
+            val jsonList = (response.optJSONArray(Constants.STORES_PROPERTY)?:"").toString()
+
+            if(status == Constants.SUCCESS && jsonList != ""){
                 val mutableListType = object : TypeToken<MutableList<StoreEntity>>(){}.type
-                callbak(Gson().fromJson(jsonList, mutableListType))
+                callbak(Gson().fromJson(jsonList, mutableListType), null)
             }else{
-                throw StoresExceptions(TypeError.API)
+                callbak(null, StoresExceptions(TypeError.API))
             }
         }, {
-            it.printStackTrace()
+            callbak(null, StoresExceptions(TypeError.API))
         })
 
         StoreApplication.storeApi.addToRequestQueue(jsonObjectRequest)
